@@ -1,0 +1,464 @@
+/* Layout after fromjason.xyz (single 650px column); palette after the Gateway Kokoro cover. */
+:root {
+  --paper: #f7f3e8;
+  --ink: #2a2620;
+  --muted: #7a7266;
+  --green: #24432f;
+  --green-pale: color-mix(in srgb, var(--green) 22%, var(--paper));
+  --stripe: 10px;
+}
+
+html { background: var(--paper); }
+
+body {
+  margin: 0;
+  padding: 3rem 1.5rem 6rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 20px;
+  line-height: 1.55;
+  border-right: var(--stripe) solid var(--green);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+main {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+p { margin: 0.75em 0 0; }
+
+h1, h2, h3 {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--green);
+  line-height: 1.3;
+  margin: 1.9em 0 0;
+}
+h1 { font-size: 2em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.3em; }
+
+a { color: var(--green); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+a:hover { color: var(--muted); }
+
+@media (max-width: 480px) {
+  :root { --stripe: 6px; }
+  body { font-size: 18px; padding: 2rem 1rem 4rem; }
+}
+
+/* Route map */
+figure.route { margin: 2em 0; }
+figure.route img { display: block; width: 100%; height: auto; }
+
+/* Media footnotes (behaviour in /footnotes.js)
+   Desktop: popover above/below the number. Touch: bottom sheet. Click media: lightbox. */
+.fn { position: relative; }
+.fn-mark {
+  font: inherit;
+  font-size: 0.62em;
+  font-weight: 500;
+  line-height: 1;
+  vertical-align: 0.55em;
+  color: var(--paper);
+  background: var(--green);
+  border: 0;
+  border-radius: 1em;
+  min-width: 1.45em;
+  padding: 0.18em 0.35em 0.12em;
+  margin-left: 0.15em;
+  cursor: pointer;
+}
+.fn-mark:hover, .fn.is-open .fn-mark { background: var(--ink); }
+.fn-mark:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+.fn-pop {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(calc(-50% + var(--fn-shift, 0px)));
+  padding-bottom: 6px; /* hover bridge between number and card */
+}
+.fn.is-below .fn-pop { bottom: auto; top: 100%; padding-bottom: 0; padding-top: 6px; }
+.fn.is-open .fn-pop { display: block; }
+
+.fn-card {
+  display: block;
+  padding: 0.4em;
+  background: var(--paper);
+  border: 1px solid var(--green);
+  box-shadow: 0 4px 18px rgba(42, 38, 32, 0.18);
+}
+/* Size comes from the media's own width/height (--w/--h), so placement works before it loads. */
+.fn-card img, .fn-card video {
+  display: block;
+  aspect-ratio: var(--w) / var(--h);
+  height: auto;
+  width: min(360px, 80vw, calc(var(--fn-max-h, 60vh) * var(--w) / var(--h)));
+  cursor: zoom-in;
+}
+.fn-progress, .gal-progress {
+  display: block;
+  height: 3px;
+  margin-top: 4px;
+  background: var(--green-pale);
+}
+.fn-progress { width: min(360px, 80vw, calc(var(--fn-max-h, 60vh) * var(--w) / var(--h))); }
+.fn-progress > span, .gal-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.fn-cap {
+  display: block;
+  max-width: min(360px, 80vw);
+  width: min-content;
+  min-width: 100%;
+  padding: 0.35em 0.1em 0.05em;
+  font-size: 0.8em;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+/* Touch screens: bottom sheet */
+@media not ((hover: hover) and (pointer: fine)) {
+  .fn { position: static; }
+  .fn-pop, .fn.is-below .fn-pop {
+    position: fixed;
+    top: auto;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    transform: none;
+    padding: 0;
+  }
+  .fn-card { padding: 0.5em; }
+  .fn-card img, .fn-card video {
+    margin: 0 auto;
+    width: min(100%, calc(55vh * var(--w) / var(--h)));
+  }
+  .fn-progress { margin: 4px auto 0; width: min(100%, calc(55vh * var(--w) / var(--h))); }
+  .fn-cap { width: auto; max-width: none; text-align: center; }
+}
+
+/* Lightbox */
+.lightbox {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(24, 22, 18, 0.94);
+}
+.lightbox::backdrop { background: transparent; }
+.lb-open { overflow: hidden; }
+.lb-fig {
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0;
+  padding: 3rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75em;
+}
+.lb-fig img, .lb-fig video {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100% - 3em);
+  min-height: 0;
+  object-fit: contain;
+}
+.lb-fig figcaption {
+  color: var(--paper);
+  font-style: italic;
+  font-size: 0.9em;
+  text-align: center;
+  max-width: 40em;
+}
+.lb-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  font: inherit;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--paper);
+  background: none;
+  border: 0;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+/* Gallery: one row, one item at a time (behaviour in /gallery.js) */
+.gallery { margin: 3.5em 0 0; }
+.gal-stage { position: relative; }
+.gal-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  outline: none;
+}
+.gal-track::-webkit-scrollbar { display: none; }
+.gal-track:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+.gal-slide {
+  flex: 0 0 100%;
+  margin: 0;
+  scroll-snap-align: center;
+  /* --p: 0 at centre, 1 one slide away (set by gallery.js) */
+  opacity: calc(1 - var(--p, 0) * 0.7);
+  transform: scale(calc(1 - var(--p, 0) * 0.08));
+}
+.gal-slide img, .gal-slide video {
+  display: block;
+  width: 100%;
+  height: min(70vh, 480px);
+  object-fit: contain;
+  cursor: zoom-in;
+}
+/* Same box as a photo, with the picture and its progress bar centred inside it. */
+.gal-video {
+  --gal-h: min(70vh, 480px);
+  --vid-w: min(100%, calc((var(--gal-h) - 7px) * var(--w) / var(--h)));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: var(--gal-h);
+}
+.gal-slide .gal-video video {
+  width: var(--vid-w);
+  height: auto;
+  max-height: none;
+  aspect-ratio: var(--w) / var(--h);
+}
+.gal-progress { width: var(--vid-w); }
+.gal-slide figcaption {
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  line-height: 1.35;
+  text-align: center;
+}
+.gal-count {
+  margin-top: 0.6em;
+  font-size: 0.75em;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Prev/next: round icon buttons over the sides of the photo */
+.gal-btn {
+  position: absolute;
+  z-index: 2;
+  top: calc(min(70vh, 480px) / 2);
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  color: var(--green);
+  background: rgba(247, 243, 232, 0.92);
+  border: 1px solid rgba(36, 67, 47, 0.35);
+  border-radius: 50%;
+  box-shadow: 0 1px 6px rgba(42, 38, 32, 0.12);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.gal-btn:hover { color: var(--paper); background: var(--green); border-color: var(--green); }
+.gal-btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.gal-prev { left: 0.5rem; }
+.gal-next { right: 0.5rem; }
+
+/* Touch: swipe, with a faded peek of the neighbours; no buttons */
+@media not ((hover: hover) and (pointer: fine)) {
+  .gal-btn { display: none; }
+  .gal-track { padding-inline: 7%; scroll-padding-inline: 7%; }
+  .gal-slide { flex-basis: 86%; }
+  .gal-slide img, .gal-slide video { height: auto; aspect-ratio: 4 / 3; max-height: 70vh; }
+  .gal-video { --gal-h: 70vh; height: auto; aspect-ratio: 4 / 3; max-height: 70vh; }
+}
+
+/* Subtle scroll fade: text eases in from the bottom edge of the screen as it scrolls up.
+   Scroll-driven CSS animation (Chrome/Edge/Safari 26+); other browsers just show the text.
+   Opacity only, so the footnote sheet (position: fixed) isn't affected. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    main > p, main > h2, main > h3, main > figure, .gallery {
+      animation: scroll-fade linear;
+      animation-timeline: view();
+      animation-range: entry 0px entry 140px;
+    }
+  }
+}
+@keyframes scroll-fade {
+  from { opacity: 0.15; }
+  to { opacity: 1; }
+}
+.has-open-fn { position: relative; z-index: 20; }
+
+/* Reading progress: the green stripe on the right fills from the top as you scroll.
+   Scroll-driven CSS (Chrome/Edge/Safari 26+); other browsers keep the plain solid stripe. */
+@supports (animation-timeline: scroll()) {
+  body { border-right-color: var(--green-pale); }
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--stripe);
+    height: 100vh;
+    background: var(--green);
+    transform-origin: top;
+    animation: read-progress linear both;
+    animation-timeline: scroll(root);
+    pointer-events: none;
+  }
+}
+@keyframes read-progress {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* Closing line: small print at the foot of the page */
+.colophon {
+  margin: 4.5em 0 0;
+  font-size: 0.7em;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: center;
+}
+.colophon p { margin: 0; }
+
+/* No browser scroll bar: the green stripe shows reading position instead. The page still scrolls. */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
+
+/* ---------- Home page ----------
+   Light cream background; paintings blend in with mix-blend-mode: darken (paper lighter than
+   the page disappears, only ink shows) and soft edge masks. Eagle 3's yellowed paper was
+   colour-corrected to white in the image file so it blends like the others.
+   Composition unit --u scales with screen height (capped by width) so the layout keeps its
+   proportions from laptop to large monitor. */
+html:has(body.home) { --paper: #ece7e0; }
+body.home {
+  --u: min(1dvh, 0.6vw);
+  --pad: clamp(1.25rem, 3vw, 3rem);
+  position: relative;
+  padding: 0;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.art { display: block; pointer-events: none; user-select: none; }
+
+/* Three eagles on one swooping diagonal: small and far (right, high) to large and near
+   (left, low), ending just above the name. No z-index anywhere here: a stacking context
+   would stop the darken blend from reaching the page. */
+.flight { position: absolute; inset: 0 0 auto 0; height: 50dvh; }
+.eagle {
+  position: absolute;
+  width: auto;
+  mix-blend-mode: darken;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 6%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 6%, #000 90%, transparent);
+  mask-composite: intersect;
+}
+.eagle-near { left: calc(var(--pad) - 2 * var(--u)); top: calc(12 * var(--u)); height: calc(36 * var(--u)); }
+.eagle-mid  { left: calc(var(--pad) + 40 * var(--u)); top: calc(7 * var(--u));  height: calc(23 * var(--u)); }
+.eagle-far  { left: calc(var(--pad) + 70 * var(--u)); top: calc(3 * var(--u));  height: calc(14 * var(--u)); }
+
+.home-main {
+  position: relative; /* no z-index (see above) */
+  max-width: none;
+  width: min(40vw, 460px);
+  margin: 0;
+  padding: 50dvh var(--pad) var(--pad); /* the name starts exactly halfway down the screen */
+}
+.home h1 { margin: 0; font-size: 2.2em; font-style: normal; line-height: 1.1; }
+.writings { margin-top: 2em; }
+.writings h2 {
+  margin: 0 0 0.35em;
+  font-size: 1.1em;
+  color: var(--muted);
+}
+.writings ul { list-style: none; margin: 0; padding: 0; }
+.writings li { margin: 0.2em 0; }
+.writings a { text-decoration: none; }
+.writings a::before { content: "["; }
+.writings a::after { content: "]"; }
+.writings a:hover { color: var(--muted); }
+
+/* Landscape: bottom-right corner, flush against the green stripe */
+.art-baoshi {
+  position: absolute;
+  right: 0; /* body's padding edge = the inner edge of the green stripe */
+  bottom: 0;
+  width: 42vw;
+  height: 46vh;
+  object-fit: cover;
+  object-position: 50% 42%;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 45%), linear-gradient(to bottom, transparent, #000 50%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 45%), linear-gradient(to bottom, transparent, #000 50%);
+  mask-composite: intersect;
+}
+
+/* Tablets held upright: more height than width, so scale the swoop by width */
+@media (orientation: portrait) and (min-width: 701px) {
+  body.home { --u: min(0.9dvh, 1.05vw); }
+  .art-baoshi { width: 60vw; height: 36vh; }
+}
+
+/* Phones: two eagles in a tight stagger, landscape as a band along the bottom */
+@media (max-width: 700px) {
+  body.home { --pad: 1.5rem; height: auto; min-height: 100dvh; overflow: visible; }
+  .eagle-far { display: none; }
+  .eagle-near { left: 0.5rem; top: 8dvh; height: min(30dvh, 64vw); }
+  .eagle-mid  { left: auto; right: 9vw; top: 3dvh; height: min(16dvh, 34vw); }
+  .home-main { width: auto; padding: 50dvh 1.25rem 34vh; }
+  .art-baoshi {
+    width: 100%;
+    height: 32vh;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%);
+    mask-image: linear-gradient(to bottom, transparent, #000 45%);
+  }
+}
+
+/* Phones held sideways / very short windows: drop the half-height rule, let it scroll,
+   eagles in a small row (near on the left), no landscape */
+@media (max-height: 520px) and (orientation: landscape) {
+  body.home { height: auto; min-height: 100dvh; overflow: visible; }
+  .flight {
+    position: relative;
+    height: auto;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1rem var(--pad) 0;
+  }
+  .eagle { position: static; }
+  .eagle-near { height: 140px; }
+  .eagle-mid { height: 95px; margin-top: 4px; }
+  .eagle-far { display: block; height: 62px; }
+  .home-main { width: auto; padding-top: 1rem; }
+  .art-baoshi { display: none; }
+}
